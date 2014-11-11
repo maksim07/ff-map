@@ -25,6 +25,7 @@ public class FMapTest {
             map2.put(key, i);
             assertEquals(map1.size(), map2.size());
             assertEquals("For index " + key, map1.get(key), map2.get(key));
+            assertTrue(map1.containsKey(key));
         }
 
         long size1 = RamUsageEstimator.sizeOf(map1);

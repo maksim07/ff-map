@@ -45,7 +45,34 @@ public class FMap<K, V> implements Map<K,V> {
 
     @Override
     public boolean containsKey(Object key) {
-        return get(key) != null;
+        // TODO: remove the copypaste
+        int hash = hashcode(key);
+        int basket = hashIndex(hash, capacity);
+
+        boolean basketExists = main.hasRow(basket);
+
+        // if it is the first key with such hash
+        if (!basketExists) {
+            return false;
+        }
+        // if such hash is already in the map
+        else {
+            int row = basket;
+            LinkedTable table = main;
+
+            do {
+                if (equals(table.keys[row], key)) {
+                    return true;
+                }
+
+                if (!table.hasNextRow(row))
+                    return false;
+
+                row = table.getNextRow(row);
+                table = tail;
+
+            } while(true);
+        }
     }
 
     @Override
