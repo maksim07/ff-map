@@ -107,7 +107,6 @@ public class FMap<K, V> implements Map<K,V> {
         // if such hash is already in the map
         else {
             int row = basket;
-            int last = -1;
             LinkedTable table = main;
 
             do {
@@ -119,7 +118,6 @@ public class FMap<K, V> implements Map<K,V> {
                 if (!table.hasNextRow(row))
                     break;
 
-                last = row;
                 row = table.getNextRow(row);
                 table = tail;
 
