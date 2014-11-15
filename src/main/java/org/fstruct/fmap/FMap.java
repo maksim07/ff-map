@@ -35,7 +35,7 @@ public class FMap<K, V> implements Map<K,V> {
     /**
      * Version of the map
      */
-    private int modVersion;
+    private transient int modVersion;
 
 
     public FMap(int capacity) {
@@ -186,7 +186,7 @@ public class FMap<K, V> implements Map<K,V> {
 
     @Override
     public void putAll(Map<? extends K, ? extends V> m) {
-
+        throw new RuntimeException("Method is not supported");
     }
 
     @Override
@@ -243,7 +243,13 @@ public class FMap<K, V> implements Map<K,V> {
     }
 
 
-    private int hashcode(Object key) {
+    /**
+     * Calculation of key hashcode
+     *
+     * @param key key
+     * @return corresponding hashcode
+     */
+    private static int hashcode(Object key) {
         if (key == null) return 0;
 
         int h = key.hashCode();
@@ -251,11 +257,25 @@ public class FMap<K, V> implements Map<K,V> {
         return h ^ (h >>> 7) ^ (h >>> 4);
     }
 
-    private int hashIndex(int h, int length) {
+    /**
+     * Returns index in the table corresponds to the hashcode
+     *
+     * @param h hashcode
+     * @param length length of main table
+     * @return rownum in the table
+     */
+    private static int hashIndex(int h, int length) {
         return (h > 0 ? 1 : -1) * (h % length);//h & (length - 1);
     }
 
-    private boolean equals(Object key1, Object key2) {
+    /**
+     * Returns true of objects are equal. Method takes in account that keys can be nulls.
+     *
+     * @param key1 first object
+     * @param key2 second object
+     * @return true of they are equal
+     */
+    private static boolean equals(Object key1, Object key2) {
         if (key1 == null) return key2 == null;
         else return key1.equals(key2);
     }
