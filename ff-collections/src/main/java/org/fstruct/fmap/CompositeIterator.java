@@ -3,6 +3,8 @@ package org.fstruct.fmap;
 import java.util.Iterator;
 
 /**
+ * Iterator based on other iterators.
+ *
  * @author Max Osipov
  */
 public class CompositeIterator<T> implements Iterator<T> {

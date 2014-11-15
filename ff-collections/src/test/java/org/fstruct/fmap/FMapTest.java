@@ -1,6 +1,5 @@
 package org.fstruct.fmap;
 
-import com.carrotsearch.sizeof.RamUsageEstimator;
 import org.junit.Test;
 
 import java.util.*;
@@ -25,12 +24,6 @@ public class FMapTest {
             assertEquals("For index " + key, map1.get(key), map2.get(key));
             assertTrue(map1.containsKey(key));
         }
-
-
-        long size1 = RamUsageEstimator.sizeOf(map1);
-        long size2 = RamUsageEstimator.sizeOf(map2);
-        System.out.println("Sizes are " + size1 + " vs " + size2 + " and the ratio is " + ((double) size1 / size2) +
-                " or " + (size2 - size1) / COUNT_OF_ITEMS + " bytes per element; or " + (size2 - size1) / (1024 * 1024) + " mb");
     }
 
     @Test
