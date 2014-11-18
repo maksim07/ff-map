@@ -13,29 +13,19 @@ public class FMap<K, V> implements Map<K,V> {
     public static final double LOAD_FACTOR = 1.25;
 
     /**
-     * The part of the capacity additionally allocated for collision zone
-     */
-    public static final double COLLISION_AREA_FACTOR = 0.1;
-
-    /**
      * Predicted capacity of the collection.
      */
     private int capacity;
 
     /**
+     * Each row either reference to row in tha linked table or null (zero)
+     */
+    private int[] baskets;
+
+    /**
      * Table for first keys for each hashcode
      */
-    private LinkedTable main;
-
-    /**
-     * Table for collisions
-     */
-    private LinkedTable tail;
-
-    /**
-     * Version of the map
-     */
-    private transient int modVersion;
+    private LinkedTable<K, V> table;
 
 
     public FMap(int capacity) {
@@ -43,13 +33,13 @@ public class FMap<K, V> implements Map<K,V> {
             throw new IllegalArgumentException("Capacity has to be greater than zero");
 
         this.capacity = capacity;
-        main = new LinkedTable(capacity);
-        tail = new LinkedTable((int)(capacity * COLLISION_AREA_FACTOR));
+        table = new LinkedTable<>(capacity);
+        baskets = new int[capacity];
     }
 
     @Override
     public int size() {
-        return main.size + tail.size;
+        return table.size;
     }
 
     @Override
@@ -63,7 +53,7 @@ public class FMap<K, V> implements Map<K,V> {
         int hash = hashcode(key);
         int basket = hashIndex(hash, capacity);
 
-        boolean basketExists = main.hasRow(basket);
+        boolean basketExists = isBasketExists(basket);
 
         // if it is the first key with such hash
         if (!basketExists) {
@@ -71,8 +61,7 @@ public class FMap<K, V> implements Map<K,V> {
         }
         // if such hash is already in the map
         else {
-            int row = basket;
-            LinkedTable table = main;
+            int row = getLink(basket);
 
             do {
                 if (equals(table.keys[row], key)) {
@@ -83,19 +72,13 @@ public class FMap<K, V> implements Map<K,V> {
                     return false;
 
                 row = table.getNextRow(row);
-                table = tail;
-
             } while(true);
         }
     }
 
     @Override
     public boolean containsValue(Object value) {
-        for (Object v : main.values)
-            if (v.equals(value))
-                return true;
-
-        for (Object v : tail.values)
+        for (Object v : table.values)
             if (v.equals(value))
                 return true;
 
@@ -107,7 +90,7 @@ public class FMap<K, V> implements Map<K,V> {
         int hash = hashcode(key);
         int basket = hashIndex(hash, capacity);
 
-        boolean basketExists = main.hasRow(basket);
+        boolean basketExists = isBasketExists(basket);
 
         // if it is the first key with such hash
         if (!basketExists) {
@@ -115,41 +98,41 @@ public class FMap<K, V> implements Map<K,V> {
         }
         // if such hash is already in the map
         else {
-            int row = basket;
-            LinkedTable table = main;
+            int row = getLink(basket);
 
             do {
                 if (equals(table.keys[row], key)) {
-                    return (V) table.values[row];
+                    return table.value(row);
                 }
 
                 if (!table.hasNextRow(row))
                     return null;
 
                 row = table.getNextRow(row);
-                table = tail;
-
             } while(true);
         }
     }
 
+    private void setBasketLink(int basket, int row) {
+        baskets[basket] = (1 << 31) | row;
+    }
 
     @Override
     public V put(K key, V value) {
         int hash = hashcode(key);
         int basket = hashIndex(hash, capacity);
-        modVersion ++;
 
-        boolean basketExists = main.hasRow(basket);
+        boolean basketExists = isBasketExists(basket);
 
         // if it is the first key with such hash
         if (!basketExists) {
-            main.setRowAndIncreaseSize(basket, hash, key, value);
+            table = table.increaseIfNeeded(LOAD_FACTOR);
+            int row = table.addRow(hash, key, value);
+            setBasketLink(basket, row);
         }
         // if such hash is already in the map
         else {
-            int row = basket;
-            LinkedTable table = main;
+            int row = getLink(basket);
 
             do {
                 if (equals(table.keys[row], key)) {
@@ -161,19 +144,11 @@ public class FMap<K, V> implements Map<K,V> {
                     break;
 
                 row = table.getNextRow(row);
-                table = tail;
-
             } while(true);
 
-            tail = tail.increaseIfNeeded(LOAD_FACTOR);
 
-            if (table == main) {
-                int link = tail.addRow(hash, key, value);
-                main.setLinkTo(row, link);
-            }
-            else {
-                tail.addNextRow(row, hash, key, value);
-            }
+            table = table.increaseIfNeeded(LOAD_FACTOR);
+            table.addNextRow(row, hash, key, value);
         }
 
         return value;
@@ -181,26 +156,24 @@ public class FMap<K, V> implements Map<K,V> {
 
     @Override
     public V remove(Object key) {
-        throw new RuntimeException("Currently removing is not supported");
+        throw new UnsupportedOperationException("Currently removing is not supported");
     }
 
     @Override
     public void putAll(Map<? extends K, ? extends V> m) {
-        throw new RuntimeException("Method is not supported");
+        throw new UnsupportedOperationException("Method is not supported");
     }
 
     @Override
     public void clear() {
-        throw new RuntimeException("Method is not supported");
+        throw new UnsupportedOperationException("Method is not supported");
     }
 
     @Override
     public Set<K> keySet() {
         return new AbstractSet<K>() {
             public Iterator<K> iterator() {
-                return new CompositeIterator<K>(new Iterator[] {
-                        main.keysIterator(), tail.keysIterator()
-                });
+                return table.keysIterator();
             }
             public int size() {
                 return FMap.this.size();
@@ -221,9 +194,7 @@ public class FMap<K, V> implements Map<K,V> {
     public Collection<V> values() {
         return new AbstractCollection<V>() {
             public Iterator<V> iterator() {
-                return new CompositeIterator<V>(new Iterator[] {
-                        main.valuesIterator(), tail.valuesIterator()
-                });
+                return table.valuesIterator();
             }
             public int size() {
                 return FMap.this.size();
@@ -239,9 +210,16 @@ public class FMap<K, V> implements Map<K,V> {
 
     @Override
     public Set<Entry<K, V>> entrySet() {
-        throw new RuntimeException("Method is not supported");
+        throw new UnsupportedOperationException("Method is not supported");
     }
 
+    private boolean isBasketExists(int basketNum) {
+        return baskets[basketNum] != 0;
+    }
+
+    private int getLink(int basketNum) {
+        return 0x7FFFFFFF & baskets[basketNum];
+    }
 
     /**
      * Calculation of key hashcode
@@ -285,19 +263,13 @@ public class FMap<K, V> implements Map<K,V> {
     /**
      * Iterator over linked table keys
      */
-    private final class LinkedTableIterator implements Iterator<Object> {
+    private abstract class LinkedTableIterator<I> implements Iterator<I> {
 
         private LinkedTable table;
 
         private int row;
 
-        /**
-         * If true - kays iterator, else values
-         */
-        private boolean type;
-
-        public LinkedTableIterator(LinkedTable table, boolean type) {
-            this.type = type;
+        public LinkedTableIterator(LinkedTable table) {
             this.table = table;
             this.row = -1;
 
@@ -311,9 +283,7 @@ public class FMap<K, V> implements Map<K,V> {
             }
         }
 
-        private Object value(int row) {
-            return type ? table.keys[row] : table.values[row];
-        }
+        abstract I value(int row);
 
         @Override
         public boolean hasNext() {
@@ -321,8 +291,8 @@ public class FMap<K, V> implements Map<K,V> {
         }
 
         @Override
-        public Object next() {
-            Object ret = value(row);
+        public I next() {
+            I ret = value(row);
 
             int nrow = -1;
             for (int i = row + 1; i < table.size; i ++) {
@@ -346,7 +316,7 @@ public class FMap<K, V> implements Map<K,V> {
     /**
      * Table with columns (hashcode, key, value) where each row can reference another row
      */
-    private final class LinkedTable {
+    private final class LinkedTable<N, L> {
         private int size;
         private int capacity;
         private int[] tails;
@@ -396,6 +366,14 @@ public class FMap<K, V> implements Map<K,V> {
             return tails[row] & 0x7FFFFFFF;
         }
 
+        public N key(int row) {
+            return (N)keys[row];
+        }
+
+        public L value(int row) {
+            return (L)values[row];
+        }
+
         /**
          * Adds row to the table
          *
@@ -404,7 +382,7 @@ public class FMap<K, V> implements Map<K,V> {
          * @param value value field
          * @return rownum of inserted tuple
          */
-        private int addRow(int hash, Object key, Object value) {
+        private int addRow(int hash, N key, L value) {
             tails[size] = ~0;
             hashes[size] = hash;
             keys[size] = key;
@@ -412,17 +390,6 @@ public class FMap<K, V> implements Map<K,V> {
             return size++;
         }
 
-        private void setRowAndIncreaseSize(int row, int hash, Object key, Object value) {
-            tails[row] = ~0;
-            hashes[row] = hash;
-            keys[row] = key;
-            values[row] = value;
-            size ++;
-        }
-
-        private void setLinkTo(int row, int link) {
-            tails[row] = (1 << 31) | link;
-        }
 
         /**
          * Inserts row to the table which is next row for <code>current</code> row.
@@ -434,7 +401,7 @@ public class FMap<K, V> implements Map<K,V> {
          * @param value value to save in the row
          * @return rownum
          */
-        private int addNextRow(int current, int hash, Object key, Object value) {
+        private int addNextRow(int current, int hash, N key, L value) {
             tails[current] = (1 << 31) | size;
             tails[size] = ~0;
             hashes[size] = hash;
@@ -443,7 +410,7 @@ public class FMap<K, V> implements Map<K,V> {
             return size++;
         }
 
-        private LinkedTable increaseIfNeeded(double factor) {
+        private LinkedTable<N, L> increaseIfNeeded(double factor) {
             if (size < capacity)
                 return this;
 
@@ -456,15 +423,25 @@ public class FMap<K, V> implements Map<K,V> {
             Object[] newKeys = Arrays.copyOf(keys, newCapacity);
             Object[] newValues = Arrays.copyOf(values, newCapacity);
 
-            return new LinkedTable(size, newCapacity, newTails, newHashes, newKeys, newValues);
+            return new LinkedTable<>(size, newCapacity, newTails, newHashes, newKeys, newValues);
         }
 
-        private Iterator<Object> keysIterator() {
-            return new LinkedTableIterator(this, true);
+        private Iterator<N> keysIterator() {
+            return new LinkedTableIterator<N>(this) {
+                @Override
+                N value(int row) {
+                    return LinkedTable.this.key(row);
+                }
+            };
         }
 
-        private Iterator<Object> valuesIterator() {
-            return new LinkedTableIterator(this, false);
+        private Iterator<L> valuesIterator() {
+            return new LinkedTableIterator<L>(this) {
+                @Override
+                L value(int row) {
+                    return LinkedTable.this.value(row);
+                }
+            };
         }
     }
 }
