@@ -38,6 +38,12 @@ public class FMapTest {
             assertTrue(keySet.contains(i));
         }
 
+        int count = 0;
+        for (Integer key: keySet) {
+            count ++;
+        }
+
+        assertEquals(count, map.size());
         assertEquals(keySet.size(), map.size());
     }
 
