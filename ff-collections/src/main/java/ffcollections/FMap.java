@@ -1,4 +1,4 @@
-package org.fstruct.fmap;
+package ffcollections;
 
 import java.util.*;
 
