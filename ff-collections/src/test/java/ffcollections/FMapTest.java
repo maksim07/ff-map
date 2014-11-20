@@ -15,9 +15,10 @@ public class FMapTest {
         Map<String, Integer> map1 = new FMap<>(70001);
         Map<String, Integer> map2 = new HashMap<>();
 
-        Random random = new Random();
+        Random random = new Random(121);
         for (int i = 0; i < COUNT_OF_ITEMS; i ++) {
             String key = new UUID(random.nextLong(), random.nextLong()).toString();
+
             map1.put(key, i);
             map2.put(key, i);
             assertEquals(map1.size(), map2.size());

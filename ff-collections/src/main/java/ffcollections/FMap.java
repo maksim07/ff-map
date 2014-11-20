@@ -10,12 +10,22 @@ public class FMap<K, V> implements Map<K,V> {
     /**
      * This factor is used to increase capacity of the collection in case of it is full
      */
-    public static final double LOAD_FACTOR = 1.25;
+    public static final double LOAD_FACTOR = 0.75;
+
+    /**
+     * If no capacity provided in constructor
+     */
+    public static final int DEFAULT_INITIAL_CAPACITY = 16;
 
     /**
      * Predicted capacity of the collection.
      */
     private int capacity;
+
+    /**
+     * Threshold after which resize operation is performed
+     */
+    private int threshold;
 
     /**
      * Each row either reference to row in tha linked table or null (zero)
@@ -27,12 +37,16 @@ public class FMap<K, V> implements Map<K,V> {
      */
     private LinkedTable<K, V> table;
 
+    public FMap() {
+        this(DEFAULT_INITIAL_CAPACITY);
+    }
 
     public FMap(int capacity) {
         if (capacity <= 0)
             throw new IllegalArgumentException("Capacity has to be greater than zero");
 
         this.capacity = capacity;
+        this.threshold = (int)(this.capacity * LOAD_FACTOR);
         table = new LinkedTable<>(capacity);
         baskets = new int[capacity];
     }
@@ -47,13 +61,51 @@ public class FMap<K, V> implements Map<K,V> {
         return size() == 0;
     }
 
+
+    private void resize(int newCapacity) {
+        int[] newBaskets = new int[newCapacity];
+
+
+        for (int i = 0; i < table.size; i ++) {
+            if (table.hasRow(i))
+                table.clearNextRowLink(i);
+
+            int hash = table.hash(i);
+
+            int basket = hashIndex(hash, newCapacity);
+            if (!isBasketExists(newBaskets, basket)) {
+                setBasketLink(newBaskets, basket, i);
+            }
+            else {
+                int row = getLink(newBaskets, basket);
+
+                while (table.hasNextRow(row)) {
+                    row = table.getNextRow(row);
+                }
+
+                table.setNextNowLink(row, i);
+            }
+        }
+
+        this.baskets = newBaskets;
+        this.capacity = newCapacity;
+    }
+
+    private void resizeIfNecessary() {
+        int s = size();
+        if (s >= threshold) {
+            resize(capacity * 2);
+            threshold = (int)(capacity * LOAD_FACTOR);
+        }
+        table = table.increaseIfNecessary(2 - LOAD_FACTOR);
+    }
+
     @Override
     public boolean containsKey(Object key) {
-        // TODO: remove the copypaste
         int hash = hashcode(key);
         int basket = hashIndex(hash, capacity);
 
-        boolean basketExists = isBasketExists(basket);
+        boolean basketExists = isBasketExists(baskets, basket);
 
         // if it is the first key with such hash
         if (!basketExists) {
@@ -61,7 +113,7 @@ public class FMap<K, V> implements Map<K,V> {
         }
         // if such hash is already in the map
         else {
-            int row = getLink(basket);
+            int row = getLink(baskets, basket);
 
             do {
                 if (equals(table.keys[row], key)) {
@@ -90,7 +142,7 @@ public class FMap<K, V> implements Map<K,V> {
         int hash = hashcode(key);
         int basket = hashIndex(hash, capacity);
 
-        boolean basketExists = isBasketExists(basket);
+        boolean basketExists = isBasketExists(baskets, basket);
 
         // if it is the first key with such hash
         if (!basketExists) {
@@ -98,7 +150,7 @@ public class FMap<K, V> implements Map<K,V> {
         }
         // if such hash is already in the map
         else {
-            int row = getLink(basket);
+            int row = getLink(baskets, basket);
 
             do {
                 if (equals(table.keys[row], key)) {
@@ -113,26 +165,27 @@ public class FMap<K, V> implements Map<K,V> {
         }
     }
 
-    private void setBasketLink(int basket, int row) {
+    private static void setBasketLink(int baskets[], int basket, int row) {
         baskets[basket] = (1 << 31) | row;
     }
 
     @Override
     public V put(K key, V value) {
+        resizeIfNecessary();
+
         int hash = hashcode(key);
         int basket = hashIndex(hash, capacity);
 
-        boolean basketExists = isBasketExists(basket);
+        boolean basketExists = isBasketExists(baskets, basket);
 
         // if it is the first key with such hash
         if (!basketExists) {
-            table = table.increaseIfNeeded(LOAD_FACTOR);
             int row = table.addRow(hash, key, value);
-            setBasketLink(basket, row);
+            setBasketLink(baskets, basket, row);
         }
         // if such hash is already in the map
         else {
-            int row = getLink(basket);
+            int row = getLink(baskets, basket);
 
             do {
                 if (equals(table.keys[row], key)) {
@@ -147,7 +200,6 @@ public class FMap<K, V> implements Map<K,V> {
             } while(true);
 
 
-            table = table.increaseIfNeeded(LOAD_FACTOR);
             table.addNextRow(row, hash, key, value);
         }
 
@@ -213,11 +265,11 @@ public class FMap<K, V> implements Map<K,V> {
         throw new UnsupportedOperationException("Method is not supported");
     }
 
-    private boolean isBasketExists(int basketNum) {
+    private static boolean isBasketExists(int[] baskets, int basketNum) {
         return baskets[basketNum] != 0;
     }
 
-    private int getLink(int basketNum) {
+    private static int getLink(int[] baskets, int basketNum) {
         return 0x7FFFFFFF & baskets[basketNum];
     }
 
@@ -359,7 +411,7 @@ public class FMap<K, V> implements Map<K,V> {
          * @return true or false according to existence of next row
          */
         private boolean hasNextRow(int row) {
-            return hasRow(row) && ((tails[row] & 0x7FFFFFFF) ^ 0x7FFFFFFF) != 0;
+            return ((tails[row] & 0x7FFFFFFF) ^ 0x7FFFFFFF) != 0;
         }
 
         private int getNextRow(int row) {
@@ -372,6 +424,10 @@ public class FMap<K, V> implements Map<K,V> {
 
         public L value(int row) {
             return (L)values[row];
+        }
+
+        public int hash(int row) {
+            return hashes[row];
         }
 
         /**
@@ -388,6 +444,14 @@ public class FMap<K, V> implements Map<K,V> {
             keys[size] = key;
             values[size] = value;
             return size++;
+        }
+
+        private void clearNextRowLink(int row) {
+            tails[row] = ~0;
+        }
+
+        private void setNextNowLink(int row, int next) {
+            tails[row] = (1 << 31) | next;
         }
 
 
@@ -410,7 +474,7 @@ public class FMap<K, V> implements Map<K,V> {
             return size++;
         }
 
-        private LinkedTable<N, L> increaseIfNeeded(double factor) {
+        private LinkedTable<N, L> increaseIfNecessary(double factor) {
             if (size < capacity)
                 return this;
 

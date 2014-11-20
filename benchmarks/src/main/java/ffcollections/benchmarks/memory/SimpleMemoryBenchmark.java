@@ -17,7 +17,7 @@ public class SimpleMemoryBenchmark {
 
     public static void main(String[] args) {
 
-        Map<String, Integer> fmap = new FMap<>(700001);
+        Map<String, Integer> fmap = new FMap<>();
         Map<String, Integer> map = new HashMap<>();
 
         Random random = new Random(33133312L);
