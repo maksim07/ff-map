@@ -62,6 +62,9 @@ public class FMap<K, V> implements Map<K,V> {
     }
 
 
+    /**
+     * Method resizes map for new capacity
+     */
     private void resize(int newCapacity) {
         int[] newBaskets = new int[newCapacity];
 
@@ -414,6 +417,11 @@ public class FMap<K, V> implements Map<K,V> {
             return ((tails[row] & 0x7FFFFFFF) ^ 0x7FFFFFFF) != 0;
         }
 
+        /**
+         *  Returns index of next row to the parameter row
+         * 
+         * @param row row in the table for which next row has to be returned
+         */
         private int getNextRow(int row) {
             return tails[row] & 0x7FFFFFFF;
         }
@@ -446,6 +454,9 @@ public class FMap<K, V> implements Map<K,V> {
             return size++;
         }
 
+        /**
+         * Method clears nexr row link for the row
+         */
         private void clearNextRowLink(int row) {
             tails[row] = ~0;
         }
