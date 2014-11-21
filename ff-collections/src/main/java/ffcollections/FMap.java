@@ -30,7 +30,7 @@ public class FMap<K, V> implements Map<K,V> {
     /**
      * Each row either reference to row in tha linked table or null (zero)
      */
-    private int[] baskets;
+    private int[] buckets;
 
     /**
      * Table for first keys for each hashcode
@@ -48,7 +48,7 @@ public class FMap<K, V> implements Map<K,V> {
         this.capacity = capacity;
         this.threshold = (int)(this.capacity * LOAD_FACTOR);
         table = new LinkedTable<>(capacity);
-        baskets = new int[capacity];
+        buckets = new int[capacity];
     }
 
     @Override
@@ -66,7 +66,7 @@ public class FMap<K, V> implements Map<K,V> {
      * Method resizes map for new capacity
      */
     private void resize(int newCapacity) {
-        int[] newBaskets = new int[newCapacity];
+        int[] newBuckets = new int[newCapacity];
 
 
         for (int i = 0; i < table.size; i ++) {
@@ -75,12 +75,12 @@ public class FMap<K, V> implements Map<K,V> {
 
             int hash = table.hash(i);
 
-            int basket = hashIndex(hash, newCapacity);
-            if (!isBasketExists(newBaskets, basket)) {
-                setBasketLink(newBaskets, basket, i);
+            int bucket = hashIndex(hash, newCapacity);
+            if (!isBucketExists(newBuckets, bucket)) {
+                setBucketLink(newBuckets, bucket, i);
             }
             else {
-                int row = getLink(newBaskets, basket);
+                int row = getLink(newBuckets, bucket);
 
                 while (table.hasNextRow(row)) {
                     row = table.getNextRow(row);
@@ -90,12 +90,12 @@ public class FMap<K, V> implements Map<K,V> {
             }
         }
 
-        this.baskets = newBaskets;
+        this.buckets = newBuckets;
         this.capacity = newCapacity;
     }
 
     /**
-     * Mathod check if either baskets array or table should be increased
+     * Mathod check if either buckets array or table should be increased
      */
     private void resizeIfNecessary() {
         int s = size();
@@ -109,17 +109,17 @@ public class FMap<K, V> implements Map<K,V> {
     @Override
     public boolean containsKey(Object key) {
         int hash = hashcode(key);
-        int basket = hashIndex(hash, capacity);
+        int bucket = hashIndex(hash, capacity);
 
-        boolean basketExists = isBasketExists(baskets, basket);
+        boolean bucketExists = isBucketExists(buckets, bucket);
 
         // if it is the first key with such hash
-        if (!basketExists) {
+        if (!bucketExists) {
             return false;
         }
         // if such hash is already in the map
         else {
-            int row = getLink(baskets, basket);
+            int row = getLink(buckets, bucket);
 
             do {
                 if (equals(table.keys[row], key)) {
@@ -146,17 +146,17 @@ public class FMap<K, V> implements Map<K,V> {
     @Override
     public V get(Object key) {
         int hash = hashcode(key);
-        int basket = hashIndex(hash, capacity);
+        int bucket = hashIndex(hash, capacity);
 
-        boolean basketExists = isBasketExists(baskets, basket);
+        boolean bucketExists = isBucketExists(buckets, bucket);
 
         // if it is the first key with such hash
-        if (!basketExists) {
+        if (!bucketExists) {
             return null;
         }
         // if such hash is already in the map
         else {
-            int row = getLink(baskets, basket);
+            int row = getLink(buckets, bucket);
 
             do {
                 if (equals(table.keys[row], key)) {
@@ -171,8 +171,8 @@ public class FMap<K, V> implements Map<K,V> {
         }
     }
 
-    private static void setBasketLink(int baskets[], int basket, int row) {
-        baskets[basket] = (1 << 31) | row;
+    private static void setBucketLink(int buckets[], int bucket, int row) {
+        buckets[bucket] = (1 << 31) | row;
     }
 
     @Override
@@ -180,18 +180,18 @@ public class FMap<K, V> implements Map<K,V> {
         resizeIfNecessary();
 
         int hash = hashcode(key);
-        int basket = hashIndex(hash, capacity);
+        int bucket = hashIndex(hash, capacity);
 
-        boolean basketExists = isBasketExists(baskets, basket);
+        boolean bucketExists = isBucketExists(buckets, bucket);
 
         // if it is the first key with such hash
-        if (!basketExists) {
+        if (!bucketExists) {
             int row = table.addRow(hash, key, value);
-            setBasketLink(baskets, basket, row);
+            setBucketLink(buckets, bucket, row);
         }
         // if such hash is already in the map
         else {
-            int row = getLink(baskets, basket);
+            int row = getLink(buckets, bucket);
 
             do {
                 if (equals(table.keys[row], key)) {
@@ -271,12 +271,12 @@ public class FMap<K, V> implements Map<K,V> {
         throw new UnsupportedOperationException("Method is not supported");
     }
 
-    private static boolean isBasketExists(int[] baskets, int basketNum) {
-        return baskets[basketNum] != 0;
+    private static boolean isBucketExists(int[] buckets, int bucketNum) {
+        return buckets[bucketNum] != 0;
     }
 
-    private static int getLink(int[] baskets, int basketNum) {
-        return 0x7FFFFFFF & baskets[basketNum];
+    private static int getLink(int[]buckets, int bucketNum) {
+        return 0x7FFFFFFF & buckets[bucketNum];
     }
 
     /**
