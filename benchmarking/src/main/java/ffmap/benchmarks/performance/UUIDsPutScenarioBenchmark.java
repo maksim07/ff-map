@@ -1,4 +1,4 @@
-package ffcollections.benchmarks.performance;
+package ffmap.benchmarks.performance;
 
 import org.openjdk.jmh.annotations.Benchmark;
 

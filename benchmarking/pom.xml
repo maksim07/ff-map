@@ -27,7 +27,7 @@ questions.
     <modelVersion>4.0.0</modelVersion>
     <parent>
     <artifactId>multi-module</artifactId>
-    <groupId>ff-collections</groupId>
+    <groupId>ff-map</groupId>
     <version>1.0-SNAPSHOT</version>
   </parent>
 
@@ -44,8 +44,8 @@ questions.
 
     <dependencies>
         <dependency>
-            <groupId>ff-collections</groupId>
-            <artifactId>ff-collections</artifactId>
+            <groupId>ff-map</groupId>
+            <artifactId>ff-map</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

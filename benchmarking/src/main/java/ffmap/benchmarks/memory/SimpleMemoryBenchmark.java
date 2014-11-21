@@ -1,7 +1,7 @@
-package ffcollections.benchmarks.memory;
+package ffmap.benchmarks.memory;
 
 import com.carrotsearch.sizeof.RamUsageEstimator;
-import ffcollections.FFMap;
+import ffmap.FFMap;
 
 import java.util.HashMap;
 import java.util.Map;

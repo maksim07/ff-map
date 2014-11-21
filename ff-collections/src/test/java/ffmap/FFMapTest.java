@@ -1,4 +1,4 @@
-package ffcollections;
+package ffmap;
 
 import org.junit.Test;
 

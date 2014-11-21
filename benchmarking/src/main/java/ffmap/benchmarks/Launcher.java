@@ -1,8 +1,4 @@
-package ffcollections.benchmarks;
-
-import java.util.Arrays;
-import ffcollections.benchmarks.memory.*;
-import ffcollections.benchmarks.performance.*;
+package ffmap.benchmarks;
 
 
 public class Launcher {

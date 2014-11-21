@@ -1,4 +1,4 @@
-package ffcollections;
+package ffmap;
 
 import java.util.*;
 
