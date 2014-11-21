@@ -86,7 +86,7 @@ public class FMap<K, V> implements Map<K,V> {
                     row = table.getNextRow(row);
                 }
 
-                table.setNextNowLink(row, i);
+                table.setNextRowLink(row, i);
             }
         }
 
@@ -94,6 +94,9 @@ public class FMap<K, V> implements Map<K,V> {
         this.capacity = newCapacity;
     }
 
+    /**
+     * Mathod check if either baskets array or table should be increased
+     */
     private void resizeIfNecessary() {
         int s = size();
         if (s >= threshold) {
@@ -456,12 +459,18 @@ public class FMap<K, V> implements Map<K,V> {
 
         /**
          * Method clears nexr row link for the row
+         * @param row table row
          */
         private void clearNextRowLink(int row) {
             tails[row] = ~0;
         }
 
-        private void setNextNowLink(int row, int next) {
+        /**
+         * Method updates this row reference to its next row
+         * @param row the row to change
+         * @param next new next row for this row
+         */
+        private void setNextRowLink(int row, int next) {
             tails[row] = (1 << 31) | next;
         }
 
@@ -485,6 +494,10 @@ public class FMap<K, V> implements Map<K,V> {
             return size++;
         }
 
+        /**
+         * Method increases table capacity by the factor if its current size equals to current capacity
+         * @param factor factor to increase capacity
+         */
         private LinkedTable<N, L> increaseIfNecessary(double factor) {
             if (size < capacity)
                 return this;
