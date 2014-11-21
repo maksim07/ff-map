@@ -5,7 +5,7 @@ import java.util.*;
 /**
  * @author Max Osipov
  */
-public class FMap<K, V> implements Map<K,V> {
+public class FFMap<K, V> implements Map<K,V> {
 
     /**
      * This factor is used to increase capacity of the collection in case of it is full
@@ -37,11 +37,11 @@ public class FMap<K, V> implements Map<K,V> {
      */
     private LinkedTable<K, V> table;
 
-    public FMap() {
+    public FFMap() {
         this(DEFAULT_INITIAL_CAPACITY);
     }
 
-    public FMap(int capacity) {
+    public FFMap(int capacity) {
         if (capacity <= 0)
             throw new IllegalArgumentException("Capacity has to be greater than zero");
 
@@ -234,7 +234,7 @@ public class FMap<K, V> implements Map<K,V> {
                 return table.keysIterator();
             }
             public int size() {
-                return FMap.this.size();
+                return FFMap.this.size();
             }
             public boolean contains(Object o) {
                 return containsKey(o);
@@ -243,7 +243,7 @@ public class FMap<K, V> implements Map<K,V> {
                 throw new UnsupportedOperationException("Remove method is currently not supported");
             }
             public void clear() {
-                FMap.this.clear();
+                FFMap.this.clear();
             }
         };
     }
@@ -255,13 +255,13 @@ public class FMap<K, V> implements Map<K,V> {
                 return table.valuesIterator();
             }
             public int size() {
-                return FMap.this.size();
+                return FFMap.this.size();
             }
             public boolean contains(Object o) {
                 return containsValue(o);
             }
             public void clear() {
-                FMap.this.clear();
+                FFMap.this.clear();
             }
         };
     }

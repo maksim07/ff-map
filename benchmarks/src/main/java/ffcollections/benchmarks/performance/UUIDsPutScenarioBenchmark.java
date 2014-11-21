@@ -1,6 +1,6 @@
 package ffcollections.benchmarks.performance;
 
-import ffcollections.FMap;
+import ffcollections.FFMap;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,7 +19,7 @@ public class UUIDsPutScenarioBenchmark {
 
 
         for (int i = 0; i < 5; i ++) {
-            Map<String, Integer> map = args[0].equals("map") ? new HashMap<String, Integer>() : new FMap<String, Integer>();
+            Map<String, Integer> map = args[0].equals("map") ? new HashMap<String, Integer>() : new FFMap<String, Integer>();
             testMap(map);
             System.out.println("Warm up loop " + i);
         }
@@ -27,7 +27,7 @@ public class UUIDsPutScenarioBenchmark {
         long time = 0;
         for (int i = 0; i < 10; i ++) {
             long t = System.currentTimeMillis();
-            Map<String, Integer> map = args[0].equals("map") ? new HashMap<String, Integer>() : new FMap<String, Integer>();
+            Map<String, Integer> map = args[0].equals("map") ? new HashMap<String, Integer>() : new FFMap<String, Integer>();
             testMap(map);
             time += (System.currentTimeMillis() - t);
         }

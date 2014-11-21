@@ -1,7 +1,7 @@
 package ffcollections.benchmarks.memory;
 
 import com.carrotsearch.sizeof.RamUsageEstimator;
-import ffcollections.FMap;
+import ffcollections.FFMap;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +17,7 @@ public class SimpleMemoryBenchmark {
 
     public static void main(String[] args) {
 
-        Map<String, Integer> fmap = new FMap<>();
+        Map<String, Integer> fmap = new FFMap<>();
         Map<String, Integer> map = new HashMap<>();
 
         Random random = new Random(33133312L);

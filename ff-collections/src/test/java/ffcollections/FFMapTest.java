@@ -6,13 +6,13 @@ import java.util.*;
 
 import static org.junit.Assert.*;
 
-public class FMapTest {
+public class FFMapTest {
 
     public static final int COUNT_OF_ITEMS = 250000;
 
     @Test
     public void testPut() throws Exception {
-        Map<String, Integer> map1 = new FMap<>(70001);
+        Map<String, Integer> map1 = new FFMap<>(70001);
         Map<String, Integer> map2 = new HashMap<>();
 
         Random random = new Random(121);
@@ -29,7 +29,7 @@ public class FMapTest {
 
     @Test
     public void testKeySet() {
-        Map<Integer, Integer> map = new FMap<>(37);
+        Map<Integer, Integer> map = new FFMap<>(37);
 
         for (int i = 0; i < 100; i ++)
             map.put(i, i + 1);
@@ -50,7 +50,7 @@ public class FMapTest {
 
     @Test
     public void testValueSet() {
-        Map<Integer, Integer> map = new FMap<>(37);
+        Map<Integer, Integer> map = new FFMap<>(37);
 
         for (int i = 0; i < 100; i ++)
             map.put(i, i % 2);
