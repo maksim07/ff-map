@@ -1,4 +1,4 @@
-package ffcollections.benchmarks.memory;
+package ffcollections.benchmarks.performance;
 
 import ffcollections.FMap;
 
