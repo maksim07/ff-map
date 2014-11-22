@@ -288,9 +288,10 @@ public class FFMap<K, V> implements Map<K,V> {
     private static int hashcode(Object key) {
         if (key == null) return 0;
 
-        int h = key.hashCode();
-        h ^= (h >>> 20) ^ (h >>> 12);
-        return h ^ (h >>> 7) ^ (h >>> 4);
+        return key.hashCode();
+//        int h = key.hashCode();
+//        h ^= (h >>> 20) ^ (h >>> 12);
+//        return h ^ (h >>> 7) ^ (h >>> 4);
     }
 
     /**
@@ -301,7 +302,8 @@ public class FFMap<K, V> implements Map<K,V> {
      * @return rownum in the table
      */
     private static int hashIndex(int h, int length) {
-        return (h > 0 ? 1 : -1) * (h % length);//h & (length - 1);
+        //return (h > 0 ? 1 : -1) * (h % length);//h & (length - 1);
+        return h & (length - 1);
     }
 
     /**
@@ -406,7 +408,7 @@ public class FFMap<K, V> implements Map<K,V> {
          * @param row row index
          * @return true if it is not null
          */
-        private boolean hasRow(int row) {
+        final boolean hasRow(int row) {
             return (tails[row] >>> 31) == 1;
         }
 
@@ -416,7 +418,7 @@ public class FFMap<K, V> implements Map<K,V> {
          * @param row row index
          * @return true or false according to existence of next row
          */
-        private boolean hasNextRow(int row) {
+        final boolean hasNextRow(int row) {
             return ((tails[row] & 0x7FFFFFFF) ^ 0x7FFFFFFF) != 0;
         }
 
@@ -425,19 +427,19 @@ public class FFMap<K, V> implements Map<K,V> {
          * 
          * @param row row in the table for which next row has to be returned
          */
-        private int getNextRow(int row) {
+        final int getNextRow(int row) {
             return tails[row] & 0x7FFFFFFF;
         }
 
-        public N key(int row) {
+        final N key(int row) {
             return (N)keys[row];
         }
 
-        public L value(int row) {
+        final L value(int row) {
             return (L)values[row];
         }
 
-        public int hash(int row) {
+        final int hash(int row) {
             return hashes[row];
         }
 
@@ -449,7 +451,7 @@ public class FFMap<K, V> implements Map<K,V> {
          * @param value value field
          * @return rownum of inserted tuple
          */
-        private int addRow(int hash, N key, L value) {
+        final int addRow(int hash, N key, L value) {
             tails[size] = ~0;
             hashes[size] = hash;
             keys[size] = key;
@@ -461,7 +463,7 @@ public class FFMap<K, V> implements Map<K,V> {
          * Method clears nexr row link for the row
          * @param row table row
          */
-        private void clearNextRowLink(int row) {
+        final void clearNextRowLink(int row) {
             tails[row] = ~0;
         }
 
@@ -470,7 +472,7 @@ public class FFMap<K, V> implements Map<K,V> {
          * @param row the row to change
          * @param next new next row for this row
          */
-        private void setNextRowLink(int row, int next) {
+        final void setNextRowLink(int row, int next) {
             tails[row] = (1 << 31) | next;
         }
 
@@ -485,7 +487,7 @@ public class FFMap<K, V> implements Map<K,V> {
          * @param value value to save in the row
          * @return rownum
          */
-        private int addNextRow(int current, int hash, N key, L value) {
+        final int addNextRow(int current, int hash, N key, L value) {
             tails[current] = (1 << 31) | size;
             tails[size] = ~0;
             hashes[size] = hash;
@@ -498,7 +500,7 @@ public class FFMap<K, V> implements Map<K,V> {
          * Method increases table capacity by the factor if its current size equals to current capacity
          * @param factor factor to increase capacity
          */
-        private LinkedTable<N, L> increaseIfNecessary(double factor) {
+        final  LinkedTable<N, L> increaseIfNecessary(double factor) {
             if (size < capacity)
                 return this;
 
@@ -514,7 +516,7 @@ public class FFMap<K, V> implements Map<K,V> {
             return new LinkedTable<>(size, newCapacity, newTails, newHashes, newKeys, newValues);
         }
 
-        private Iterator<N> keysIterator() {
+        final Iterator<N> keysIterator() {
             return new LinkedTableIterator<N>(this) {
                 @Override
                 N value(int row) {
@@ -523,7 +525,7 @@ public class FFMap<K, V> implements Map<K,V> {
             };
         }
 
-        private Iterator<L> valuesIterator() {
+        final Iterator<L> valuesIterator() {
             return new LinkedTableIterator<L>(this) {
                 @Override
                 L value(int row) {

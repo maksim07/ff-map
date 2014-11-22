@@ -1,6 +1,15 @@
 package ffmap.benchmarks.performance;
 
+import ffmap.FFMap;
 import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
+
+import java.util.*;
 
 
 /**
@@ -8,31 +17,72 @@ import org.openjdk.jmh.annotations.Benchmark;
  */
 public class UUIDsPutScenarioBenchmark {
 
-    @Benchmark
-    public void testFFMap() {
+    @State(Scope.Thread)
+    public static class KeysState {
 
-//        for (int i = 0; i < 5; i ++) {
-//            Map<String, Integer> map = args[0].equals("map") ? new HashMap<String, Integer>() : new FFMap<String, Integer>();
-//            testMap(map);
-//            System.out.println("Warm up loop " + i);
-//        }
-//
-//        long time = 0;
-//        for (int i = 0; i < 10; i ++) {
-//            long t = System.currentTimeMillis();
-//            Map<String, Integer> map = args[0].equals("map") ? new HashMap<String, Integer>() : new FFMap<String, Integer>();
-//            testMap(map);
-//            time += (System.currentTimeMillis() - t);
-//        }
+        List<String> keys;
+        int index = 0;
+        Map<String, Integer> map;
 
-//        System.out.println("Average time is " + (time / 10));
+        public KeysState() {
+
+            map = createMap();
+            index = 0;
+            keys = new ArrayList<>();
+
+            Random random = new Random(12241);
+            for (int i = 0; i < 1000000; i ++) {
+                String key = new UUID(random.nextLong(), random.nextLong()).toString();
+                keys.add(key);
+            }
+        }
     }
 
-//    private static void testMap(Map<String, Integer> map) {
-//        Random random = new Random(1235);
-//        for (int i = 0; i < 1000000; i ++) {
-//            String key = new UUID(random.nextLong(), random.nextLong()).toString();
-//            map.put(key, i);
-//        }
-//    }
+    @State(Scope.Thread)
+    public static class MapState {
+
+        List<String> keys;
+        int index = 0;
+        Map<String, Integer> map;
+
+        public MapState() {
+
+            map = createMap();
+            index = 0;
+            keys = new ArrayList<>();
+
+            Random random = new Random(12241);
+            for (int i = 0; i < 1000000; i ++) {
+                String key = new UUID(random.nextLong(), random.nextLong()).toString();
+                keys.add(key);
+                map.put(key, i);
+            }
+        }
+    }
+
+    @Benchmark
+    public void benchmarkPut(KeysState state) {
+        state.map.put(state.keys.get(state.index % state.keys.size()), state.index);
+        state.index ++;
+    }
+
+    @Benchmark
+    public int benchmarkGet(MapState state) {
+        return state.map.get(state.keys.get((state.index ++) % state.keys.size()));
+    }
+
+    private static Map<String, Integer> createMap() {
+        return new FFMap<>();
+    }
+
+    public static void main(String[] args) throws RunnerException {
+        Options opt = new OptionsBuilder()
+                .include(UUIDsPutScenarioBenchmark.class.getSimpleName())
+                .warmupIterations(10)
+                .measurementIterations(20)
+                .forks(1)
+                .build();
+
+        new Runner(opt).run();
+    }
 }
