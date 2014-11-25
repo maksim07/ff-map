@@ -1,9 +1,7 @@
 package ffmap.benchmarks.performance;
 
 import ffmap.FFMap;
-import org.openjdk.jmh.annotations.Benchmark;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
@@ -19,13 +17,12 @@ public class UUIDsPutScenarioBenchmark {
 
     @State(Scope.Thread)
     public static class KeysState {
-
         List<String> keys;
         int index = 0;
         Map<String, Integer> map;
 
-        public KeysState() {
-
+        @Setup(Level.Iteration)
+        public void setup() {
             map = createMap();
             index = 0;
             keys = new ArrayList<>();
@@ -45,7 +42,8 @@ public class UUIDsPutScenarioBenchmark {
         int index = 0;
         Map<String, Integer> map;
 
-        public MapState() {
+        @Setup(Level.Iteration)
+        public void setup() {
 
             map = createMap();
             index = 0;
@@ -72,7 +70,7 @@ public class UUIDsPutScenarioBenchmark {
     }
 
     private static Map<String, Integer> createMap() {
-        return new FFMap<>();
+        return new HashMap<>();
     }
 
     public static void main(String[] args) throws RunnerException {
