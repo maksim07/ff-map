@@ -28,23 +28,22 @@ public class SimpleMemoryBenchmark {
             fmap.put(key, i);
             map.put(key, i);
             if (i % 10000 == 0 && i > 0) {
-                long fMapSize = RamUsageEstimator.sizeOf(fmap);
-                long mapSize = RamUsageEstimator.sizeOf(map);
-
-                System.out.println(fMapSize + "\t" + mapSize + "\t" +
-                                   i + "\t" + (fMapSize / i) + "\t" + (mapSize / i) + "\t" + (mapSize - fMapSize) +
-                                   "\t" + (mapSize - fMapSize) / i);
+                printMapStats(fmap, map);
             }
         }
 
-        long fMapSize = RamUsageEstimator.sizeOf(fmap);
-        long mapSize = RamUsageEstimator.sizeOf(map);
+        printMapStats(fmap, map);
+    }
 
-        System.out.println("FFMap: " + fMapSize + " or " + Math.round((double)fMapSize / COLLECTION_SIZE) + " per key");
-        System.out.println("  Map: " + mapSize + " or " + Math.round((double)mapSize / COLLECTION_SIZE) + " per key");
-        System.out.println("FMap/map percentage is " + Math.round(((double)fMapSize / mapSize) * 100) + " %");
-        System.out.println("Per element difference is " + Math.round(((double)mapSize - fMapSize) / COLLECTION_SIZE) + " byte");
-        System.out.println("Overall saving is " + Math.round((mapSize - fMapSize) / 1024d) + " Kb");
+    private static void printMapStats(Map<String, Integer> ffMap, Map<String, Integer> hashMap) {
+        long fMapSize = RamUsageEstimator.sizeOf(ffMap);
+        long mapSize = RamUsageEstimator.sizeOf(hashMap);
+        int size = ffMap.size();
+
+        System.out.println(fMapSize + "\t" + mapSize + "\t" +
+                size + "\t" + (fMapSize / size) + "\t" + (mapSize / size) + "\t" + (mapSize - fMapSize) +
+                "\t" + (mapSize - fMapSize) / size);
+
     }
 
 }
