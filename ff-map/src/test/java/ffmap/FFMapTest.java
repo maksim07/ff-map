@@ -11,8 +11,23 @@ public class FFMapTest {
     public static final int COUNT_OF_ITEMS = 250000;
 
     @Test
+    public void testNullKey() throws Exception {
+        Map<String, Integer> map1 = new FFMap<>();
+        map1.put("key", 1);
+        map1.put(null, 2);
+        map1.put("key", 3);
+        map1.put(null, 4);
+
+        assertEquals(map1.size(), 2);
+        assertTrue(map1.containsKey("key"));
+        assertTrue(map1.containsKey(null));
+        assertEquals(map1.get("key"), new Integer(3));
+        assertEquals(map1.get(null), new Integer(4));
+    }
+
+    @Test
     public void testPut() throws Exception {
-        Map<String, Integer> map1 = new FFMap<>(70001);
+        Map<String, Integer> map1 = new FFMap<>(1024 * 64);
         Map<String, Integer> map2 = new HashMap<>();
 
         Random random = new Random(121);
