@@ -5,6 +5,7 @@
     <id>jar-with-dependencies</id>
     <formats>
         <format>dir</format>
+        <format>tar.gz</format>
     </formats>
 
     <fileSets>
