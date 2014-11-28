@@ -16,8 +16,8 @@
     </description>
 
     <scm>
-        <connection>scm:git:ssh://git@github.com:maksim07/ff-map.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com:maksim07/ff-map.git</developerConnection>
+        <connection>scm:git:ssh://git@github.com:maksim07/ff-map</connection>
+        <developerConnection>scm:git:ssh://git@github.com:maksim07/ff-map</developerConnection>
     </scm>
 
     <distributionManagement>
