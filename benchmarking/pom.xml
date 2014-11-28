@@ -27,7 +27,7 @@ questions.
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>multi-module</artifactId>
+        <artifactId>all</artifactId>
         <groupId>ff-map</groupId>
         <version>0.6</version>
     </parent>
