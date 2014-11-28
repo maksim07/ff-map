@@ -15,6 +15,11 @@
         Fat free collections
     </description>
 
+    <scm>
+        <connection>scm:git:ssh://git@github.com:maksim07/ff-map.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:maksim07/ff-map.git</developerConnection>
+    </scm>
+
     <distributionManagement>
         <repository>
             <id>bintray-maksim07-maven-ff-map</id>
