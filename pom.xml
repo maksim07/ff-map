@@ -15,9 +15,31 @@
         Fat free collections
     </description>
 
+    <distributionManagement>
+        <repository>
+            <id>bintray-maksim07-maven-ff-map</id>
+            <name>maksim07-maven-ff-map</name>
+            <url>https://api.bintray.com/maven/maksim07/maven/ff-map</url>
+        </repository>
+    </distributionManagement>
 
     <build>
         <plugins>
+            <plugin>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.2.2</version>
+                <configuration>
+                    <!--
+                     During release:perform, enable the "release" profile
+                    -->
+                    <releaseProfiles>release</releaseProfiles>
+                    <goals>package deploy</goals>
+                    <preparationGoals>clean verify install</preparationGoals>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                    <pushChanges>true</pushChanges>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
