@@ -13,41 +13,28 @@ import java.util.*;
 /**
  * @author Max Osipov
  */
-public class UUIDsPutScenarioBenchmark {
+@State(Scope.Thread)
+public class UUIDsGetScenarioBenchmark {
 
-    @State(Scope.Thread)
-    public static class PutState {
-        List<String> keys;
-        int index = 0;
-        Map<String, Integer> map;
+    @Param({"gnu.trove.map.hash.TCustomHashMap", "java.util.HashMap", "ffmap.FFMap"})
+    String mapClassName;
 
-        @Setup(Level.Iteration)
-        public void setup() {
-            map = create();
-            index = 0;
-            keys = new ArrayList<>();
+    List<String> keys;
+    int index = 0;
+    Map<String, Integer> map;
 
-            Random random = new Random(12241);
-            for (int i = 0; i < 1000000; i ++) {
-                String key = new UUID(random.nextLong(), random.nextLong()).toString();
-                keys.add(key);
-            }
-        }
+    @Setup(Level.Iteration)
+    public void setup() throws Exception {
+        map = (Map<String, Integer>) Class.forName(mapClassName).newInstance();
+        index = 0;
+        keys = new ArrayList<>();
 
-        public Map<String, Integer> create() {
-            return new FFMap<>();
+        Random random = new Random(12241);
+        for (int i = 0; i < 1000000; i ++) {
+            String key = new UUID(random.nextLong(), random.nextLong()).toString();
+            keys.add(key);
         }
     }
-
-    @State(Scope.Thread)
-    public static class PutStateHashMap extends PutState {
-        @Override
-        public Map<String, Integer> create() {
-            return new HashMap<>();
-        }
-    }
-
-
 
     @State(Scope.Thread)
     public static class GetState {
@@ -85,9 +72,9 @@ public class UUIDsPutScenarioBenchmark {
     }
 
     @Benchmark
-    public void benchmarkPut(PutState state) {
-        state.map.put(state.keys.get(state.index % state.keys.size()), state.index);
-        state.index ++;
+    public void benchmarkPut() {
+        map.put(keys.get(index % keys.size()), index);
+        index ++;
     }
 
     @Benchmark
@@ -95,21 +82,9 @@ public class UUIDsPutScenarioBenchmark {
         return state.map.get(state.keys.get((state.index ++) % state.keys.size()));
     }
 
-    @Benchmark
-    public void benchmarkPutHM(PutStateHashMap state) {
-        state.map.put(state.keys.get(state.index % state.keys.size()), state.index);
-        state.index ++;
-    }
-
-    @Benchmark
-    public int benchmarkGetHM(GetStateHashMap state) {
-        return state.map.get(state.keys.get((state.index ++) % state.keys.size()));
-    }
-
-
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
-                .include(UUIDsPutScenarioBenchmark.class.getSimpleName())
+                .include(UUIDsGetScenarioBenchmark.class.getSimpleName())
                 .warmupIterations(20)
                 .measurementIterations(20)
                 .forks(1)

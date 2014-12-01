@@ -2,7 +2,7 @@ package ffmap.benchmarks;
 
 
 import ffmap.benchmarks.memory.SimpleMemoryBenchmark;
-import ffmap.benchmarks.performance.UUIDsPutScenarioBenchmark;
+import ffmap.benchmarks.performance.UUIDsGetScenarioBenchmark;
 
 import java.util.Arrays;
 
@@ -24,7 +24,7 @@ public class Launcher {
                 SimpleMemoryBenchmark.main(bargs);
         }
         else if (benchmark.equals("performance")) {
-            UUIDsPutScenarioBenchmark.main(bargs);
+            UUIDsGetScenarioBenchmark.main(bargs);
         }
         else {
             System.err.println("Unknown benchmark");

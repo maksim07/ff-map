@@ -4,7 +4,7 @@ echo "Benchmarking..."
 sdir=`dirname $0`
 
 echo "Performance test"
-java -jar $sdir/benchmarking.jar performance > performance.log
+java -Xmx1024m -jar $sdir/benchmarking.jar performance > performance.log
 
 echo "Memory test"
-java -jar $sdir/benchmarking.jar memory > memory.log
+java -Xmx1024m -jar $sdir/benchmarking.jar memory > memory.log
