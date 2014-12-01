@@ -1,6 +1,5 @@
 package ffmap.benchmarks.performance;
 
-import ffmap.FFMap;
 import gnu.trove.map.hash.TCustomHashMap;
 import gnu.trove.strategy.HashingStrategy;
 import org.openjdk.jmh.annotations.*;
@@ -11,12 +10,11 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.*;
 
-
 /**
  * @author Max Osipov
  */
 @State(Scope.Thread)
-public class UUIDsGetScenarioBenchmark {
+public class UUIDsPutScenarioBenchmark {
 
     @Param({"gnu.trove.map.hash.TCustomHashMap", "java.util.HashMap", "ffmap.FFMap"})
     String mapClassName;
@@ -48,19 +46,18 @@ public class UUIDsGetScenarioBenchmark {
         for (int i = 0; i < 1000000; i ++) {
             String key = new UUID(random.nextLong(), random.nextLong()).toString();
             keys.add(key);
-            map.put(key, i);
         }
     }
 
-
     @Benchmark
-    public int benchmarkGet() {
-        return map.get(keys.get((index ++) % keys.size()));
+    public void benchmarkPut() {
+        map.put(keys.get(index % keys.size()), index);
+        index ++;
     }
 
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
-                .include(UUIDsGetScenarioBenchmark.class.getSimpleName())
+                .include(UUIDsPutScenarioBenchmark.class.getSimpleName())
                 .warmupIterations(20)
                 .measurementIterations(20)
                 .forks(1)
