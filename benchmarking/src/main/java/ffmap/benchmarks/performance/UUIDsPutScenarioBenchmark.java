@@ -110,7 +110,7 @@ public class UUIDsPutScenarioBenchmark {
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(UUIDsPutScenarioBenchmark.class.getSimpleName())
-                .warmupIterations(10)
+                .warmupIterations(20)
                 .measurementIterations(20)
                 .forks(1)
                 .build();
