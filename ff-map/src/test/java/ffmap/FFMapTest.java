@@ -82,4 +82,42 @@ public class FFMapTest {
         assertEquals(zeros, 50);
         assertEquals(ones, 50);
     }
+
+    @Test
+    public void testClear() {
+        Map<Integer, Integer> map = new FFMap<>();
+
+        for (int i = 0; i < COUNT_OF_ITEMS; i ++)
+            map.put(i, i + 1);
+
+        assertEquals(map.size(), COUNT_OF_ITEMS);
+        map.clear();
+        assertEquals(map.size(), 0);
+
+        for (Integer i : map.keySet())
+            fail();
+
+        for (Integer i : map.values())
+            fail();
+    }
+
+    @Test
+    public void testRemove() {
+        Map<Integer, Integer> map = new FFMap<>();
+
+        for (int i = 0; i < COUNT_OF_ITEMS; i ++)
+            map.put(i, i + 1);
+
+        int itemsToRemove = 2000;
+        int offset = COUNT_OF_ITEMS / 2;
+        for (int i = 0; i < itemsToRemove; i ++)
+            assertEquals(map.remove(i + offset), new Integer(i + offset + 1));
+
+        assertEquals(map.size(), COUNT_OF_ITEMS - itemsToRemove);
+        int offset2 = 100;
+        for (int i = 0; i < itemsToRemove; i ++)
+            map.put(COUNT_OF_ITEMS + i - offset2, 1);
+
+        assertEquals(map.size(), COUNT_OF_ITEMS - offset2);
+    }
 }
