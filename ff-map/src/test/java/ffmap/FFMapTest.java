@@ -46,28 +46,43 @@ public class FFMapTest {
     public void testKeySet() {
         Map<Integer, Integer> map = new FFMap<>(37);
 
-        for (int i = 0; i < 100; i ++)
+        int mapSize = 100;
+
+        for (int i = 0; i < mapSize; i ++)
             map.put(i, i + 1);
 
         Set<Integer> keySet = map.keySet();
-        for (int i = 0; i < 100; i ++) {
+        for (int i = 0; i < mapSize; i ++) {
             assertTrue(keySet.contains(i));
         }
 
         int count = 0;
         for (Integer key: keySet) {
             count ++;
+            assertEquals(map.get(key), new Integer(key + 1));
         }
 
         assertEquals(count, map.size());
         assertEquals(keySet.size(), map.size());
+
+        map.keySet().remove(0);
+        assertEquals(map.size(), mapSize - 1);
+
+        Set<Integer> keys = map.keySet();
+        keys.clear();
+        assertEquals(keys.size(), 0);
+        assertEquals(keySet.size(), 0);
+        assertEquals(map.size(), 0);
     }
+
 
     @Test
     public void testValueSet() {
         Map<Integer, Integer> map = new FFMap<>(37);
 
-        for (int i = 0; i < 100; i ++)
+        int mapSize = 100;
+
+        for (int i = 0; i < mapSize; i ++)
             map.put(i, i % 2);
 
         Collection<Integer> valueSet = map.values();
@@ -79,8 +94,17 @@ public class FFMapTest {
             else fail("Wrong value");
         }
 
-        assertEquals(zeros, 50);
-        assertEquals(ones, 50);
+        for (int i = 0; i < mapSize; i ++)
+            assertTrue(valueSet.contains(i % 2));
+
+        assertEquals(zeros, mapSize / 2);
+        assertEquals(ones, mapSize / 2);
+
+        Collection<Integer> values = map.values();
+        values.clear();
+
+        assertEquals(map.size(), 0);
+        assertEquals(valueSet.size(), 0);
     }
 
     @Test
@@ -139,5 +163,15 @@ public class FFMapTest {
         map.put(1, 2);
         assertEquals(map.size(), 1);
         assertEquals(map.get(1), new Integer(2));
+
+        map.clear();
+        map.put(0, 2);
+        map.put(null, 3);
+        assertEquals(map.size(), 2);
+        assertEquals(map.remove(0), new Integer(2));
+        assertEquals(map.size(), 1);
+        assertEquals(map.remove(null), new Integer(3));
+        assertEquals(map.size(), 0);
     }
+
 }
