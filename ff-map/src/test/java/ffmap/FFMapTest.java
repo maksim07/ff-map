@@ -27,7 +27,7 @@ public class FFMapTest {
 
     @Test
     public void testPut() throws Exception {
-        Map<String, Integer> map1 = new FFMap<>(1024 * 64);
+        Map<String, Integer> map1 = new FFMap<>();
         Map<String, Integer> map2 = new HashMap<>();
 
         Random random = new Random(121);
@@ -40,6 +40,52 @@ public class FFMapTest {
             assertEquals("For index " + key, map1.get(key), map2.get(key));
             assertTrue(map1.containsKey(key));
         }
+    }
+
+    @Test
+    public void testGet() {
+        Map<Integer, Integer> map = new FFMap<>();
+
+        int mapSize = 120;
+        for (int i = 0; i < mapSize; i ++) {
+            map.put(i + 1, i);
+            assertEquals(map.get(i + 1), new Integer(i));
+        }
+
+        assertNull(map.get(mapSize + 2));
+
+    }
+
+    @Test
+    public void testIllegalContructor() {
+        try {
+            Map<Integer, Integer> map = new FFMap<>(-1);
+            fail();
+        } catch(Exception e) {}
+    }
+
+    @Test
+    public void testContains() {
+        Map<Integer, Integer> map = new FFMap<>();
+
+        int mapSize = 100;
+        for (int i = 0; i < mapSize; i ++)
+            map.put(i, i + 1);
+
+        for (int i = 0; i < mapSize; i ++) {
+            assertTrue(map.containsKey(i));
+            assertTrue(map.containsValue(i + 1));
+        }
+
+        assertFalse(map.containsKey(-1));
+        assertFalse(map.containsValue(0));
+        map = new FFMap<>();
+        map.put(1, 1);
+
+        assertTrue(map.containsKey(1));
+        assertFalse(map.containsKey(17));
+
+
     }
 
     @Test
@@ -126,6 +172,17 @@ public class FFMapTest {
     }
 
     @Test
+    public void testIsEmpty() {
+        Map<Integer, Integer> map = new FFMap<>();
+
+        assertTrue(map.isEmpty());
+        map.put(1, 1);
+        assertFalse(map.isEmpty());
+        map.clear();
+        assertTrue(map.isEmpty());
+    }
+
+    @Test
     public void testRemove() {
         Map<Integer, Integer> map = new FFMap<>();
 
@@ -172,6 +229,9 @@ public class FFMapTest {
         assertEquals(map.size(), 1);
         assertEquals(map.remove(null), new Integer(3));
         assertEquals(map.size(), 0);
+
+        map.put(0, 2);
+        assertNull(map.remove(16));
     }
 
 }

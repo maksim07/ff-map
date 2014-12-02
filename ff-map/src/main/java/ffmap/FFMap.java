@@ -137,7 +137,7 @@ public class FFMap<K, V> implements Map<K,V> {
     @Override
     public boolean containsValue(Object value) {
         for (Object v : table.values)
-            if (v.equals(value))
+            if (equals(v, value))
                 return true;
 
         return false;
