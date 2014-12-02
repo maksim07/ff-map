@@ -38,3 +38,5 @@ After script is completed you can find performance data in the following files:
   * **performance.log** - contains throughput tests of FFMap methods compared to corresponding methods of other implementations of java.util.Map
   * **memory.log** - contains information on how much memory take each map implementation
 
+## Results
+

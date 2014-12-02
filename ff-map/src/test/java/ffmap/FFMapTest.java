@@ -119,5 +119,25 @@ public class FFMapTest {
             map.put(COUNT_OF_ITEMS + i - offset2, 1);
 
         assertEquals(map.size(), COUNT_OF_ITEMS - offset2);
+
+        map.remove(-1);
+        assertEquals(map.size(), COUNT_OF_ITEMS - offset2);
+    }
+
+    @Test
+    public void testRemoveSmallMap() {
+        Map<Integer, Integer> map = new FFMap<>();
+
+        map.put(1, 2);
+        assertEquals(map.size(), 1);
+        assertEquals(map.get(1), new Integer(2));
+
+        map.remove(1);
+        assertEquals(map.size(), 0);
+        assertNull(map.get(1));
+
+        map.put(1, 2);
+        assertEquals(map.size(), 1);
+        assertEquals(map.get(1), new Integer(2));
     }
 }
