@@ -15,5 +15,5 @@ echo "Performance test"
 $BENCHMARK_JAVA -Xmx1024m -jar $sdir/benchmarking.jar perfget > performance.log
 $BENCHMARK_JAVA -Xmx1024m -jar $sdir/benchmarking.jar perfput >> performance.log
 
-$BENCHMARK_JAVA "Memory test"
+echo "Memory test"
 $BENCHMARK_JAVA -Xmx1024m -jar $sdir/benchmarking.jar memory > memory.log
