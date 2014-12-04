@@ -1,8 +1,5 @@
 package ffmap.benchmarks.performance;
 
-import ffmap.FFMap;
-import gnu.trove.map.hash.TCustomHashMap;
-import gnu.trove.strategy.HashingStrategy;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
@@ -16,32 +13,13 @@ import java.util.*;
  * @author Max Osipov
  */
 @State(Scope.Thread)
-public class UUIDsGetScenarioBenchmark {
-
-    @Param({"gnu.trove.map.hash.TCustomHashMap", "java.util.HashMap", "ffmap.FFMap"})
-    String mapClassName;
+public class UUIDsGetScenarioBenchmark extends MapImplsBenchmark {
 
     List<String> keys;
     int index = 0;
-    Map<String, Integer> map;
 
     @Setup(Level.Iteration)
     public void setup() throws Exception {
-        map = (Map<String, Integer>) Class.forName(mapClassName).newInstance();
-        if (map instanceof TCustomHashMap)
-            map = new TCustomHashMap<>(new HashingStrategy<String>() {
-                @Override
-                public int computeHashCode(String object) {
-                    return object.hashCode();
-                }
-
-                @Override
-                public boolean equals(String o1, String o2) {
-                    return o1.equals(o2);
-                }
-            });
-
-        index = 0;
         keys = new ArrayList<>();
 
         Random random = new Random(12241);
@@ -52,6 +30,10 @@ public class UUIDsGetScenarioBenchmark {
         }
     }
 
+    @Setup(Level.Iteration)
+    public void setupIteration() {
+        index = 0;
+    }
 
     @Benchmark
     public int benchmarkGet() {
