@@ -4,6 +4,7 @@ package ffmap.benchmarks;
 import ffmap.benchmarks.memory.SimpleMemoryBenchmark;
 import ffmap.benchmarks.performance.UUIDsGetScenarioBenchmark;
 import ffmap.benchmarks.performance.UUIDsPutScenarioBenchmark;
+import ffmap.benchmarks.performance.WordsCountBenchmark;
 
 import java.util.Arrays;
 
@@ -29,6 +30,9 @@ public class Launcher {
         }
         else if (benchmark.equals("perfput")) {
             UUIDsPutScenarioBenchmark.main(bargs);
+        }
+        else if (benchmark.equals("perfwc")) {
+            WordsCountBenchmark.main(bargs);
         }
         else {
             System.err.println("Unknown benchmark");

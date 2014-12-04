@@ -137,7 +137,7 @@ public class FFMap<K, V> implements Map<K,V> {
     @Override
     public boolean containsValue(Object value) {
         for (Object v : table.values)
-            if (v.equals(value))
+            if (equals(v, value))
                 return true;
 
         return false;
@@ -159,7 +159,7 @@ public class FFMap<K, V> implements Map<K,V> {
             int row = getLink(buckets, bucket);
 
             do {
-                if (equals(table.keys[row], key)) {
+                if (equals(table.keys[row], key) && table.hasRow(row)) {
                     return table.value(row);
                 }
 
@@ -224,7 +224,7 @@ public class FFMap<K, V> implements Map<K,V> {
             int row = getLink(buckets, bucket);
 
             do {
-                if (equals(table.keys[row], key)) {
+                if (equals(table.keys[row], key) && table.hasRow(row)) {
                     V value = table.value(row);
                     table.removeRow(row);
                     return value;
@@ -265,7 +265,7 @@ public class FFMap<K, V> implements Map<K,V> {
                 return containsKey(o);
             }
             public boolean remove(Object o) {
-                throw new UnsupportedOperationException("Remove method is currently not supported");
+                return FFMap.this.remove(o) != null;
             }
             public void clear() {
                 FFMap.this.clear();
@@ -324,7 +324,6 @@ public class FFMap<K, V> implements Map<K,V> {
      * @return rownum in the table
      */
     private static int hashIndex(int h, int length) {
-        //return (h > 0 ? 1 : -1) * (h % length);//h & (length - 1);
         return h & (length - 1);
     }
 
@@ -481,6 +480,7 @@ public class FFMap<K, V> implements Map<K,V> {
 
         void clear() {
             this.size = 0;
+            this.removes = 0;
             Arrays.fill(this.tails, 0);
             Arrays.fill(this.hashes, 0);
             Arrays.fill(this.keys, null);
