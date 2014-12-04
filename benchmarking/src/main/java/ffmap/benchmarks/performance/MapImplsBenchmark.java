@@ -11,7 +11,7 @@ import java.util.Map;
  */
 @State(Scope.Thread)
 public class MapImplsBenchmark {
-    @Param({"gnu.trove.map.hash.TCustomHashMap", "java.util.HashMap", "ffmap.FFMap"})
+    @Param({"ffmap.FFMap", "gnu.trove.map.hash.TCustomHashMap", "java.util.HashMap"})
     String mapClassName;
 
     Map<String, Integer> map;
