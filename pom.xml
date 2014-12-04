@@ -5,7 +5,7 @@
     <groupId>ff-map</groupId>
     <artifactId>all</artifactId>
     <packaging>pom</packaging>
-    <version>0.7.1-SNAPSHOT</version>
+    <version>0.7.1</version>
     <modules>
         <module>ff-map</module>
         <module>benchmarking</module>
